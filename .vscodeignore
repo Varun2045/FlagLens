@@ -1,0 +1,11 @@
+.vscode/**
+.vscode-test/**
+src/**
+tests/**
+docker/**
+demo-app/**
+.gitignore
+tsconfig.json
+DEMO_SCRIPT.md
+**/*.map
+**/*.ts

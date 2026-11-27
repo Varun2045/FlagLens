@@ -1,0 +1,204 @@
+{
+  "name": "flaglens",
+  "displayName": "FlagLens — Flagsmith Live Feature Flags",
+  "description": "Live inline feature flag status, 1-click toggles, wrap-in-flag code actions, and typo/stale flag auditing for self-hosted Flagsmith right inside VS Code.",
+  "version": "1.0.0",
+  "publisher": "flaglens-dev",
+  "icon": "media/icon.png",
+  "license": "MIT",
+  "keywords": [
+    "flagsmith",
+    "feature-flags",
+    "experimentation",
+    "ab-testing",
+    "devtools",
+    "self-hosted"
+  ],
+  "categories": [
+    "Other",
+    "Linters",
+    "Visualization"
+  ],
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "flaglens-sidebar",
+          "title": "FlagLens",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "flaglens-sidebar": [
+        {
+          "id": "flaglens.flagsView",
+          "name": "Feature Flags"
+        },
+        {
+          "id": "flaglens.healthView",
+          "name": "Flag Health & Audit"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "flaglens.refresh",
+        "title": "FlagLens: Refresh Flags",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "flaglens.switchEnvironment",
+        "title": "FlagLens: Switch Active Environment",
+        "icon": "$(server-environment)"
+      },
+      {
+        "command": "flaglens.toggleFlag",
+        "title": "FlagLens: Toggle Feature Flag",
+        "icon": "$(debug-restart)"
+      },
+      {
+        "command": "flaglens.editFlagValue",
+        "title": "FlagLens: Edit Flag Remote Config Value",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "flaglens.createFlag",
+        "title": "FlagLens: Create New Feature Flag",
+        "icon": "$(add)"
+      },
+      {
+        "command": "flaglens.wrapInFlag",
+        "title": "FlagLens: Wrap Selection in Flagsmith Flag"
+      },
+      {
+        "command": "flaglens.openInFlagsmith",
+        "title": "FlagLens: Open in Flagsmith Dashboard",
+        "icon": "$(link-external)"
+      },
+      {
+        "command": "flaglens.configureConnection",
+        "title": "FlagLens: Configure Self-Hosted Connection",
+        "icon": "$(plug)"
+      },
+      {
+        "command": "flaglens.findUsages",
+        "title": "FlagLens: Jump to Flag Usage"
+      },
+      {
+        "command": "flaglens.toggleLocalSandbox",
+        "title": "FlagLens: Start / Stop Built-in Local Sandbox",
+        "icon": "$(vm-running)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "flaglens.switchEnvironment",
+          "when": "view == flaglens.flagsView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "flaglens.createFlag",
+          "when": "view == flaglens.flagsView",
+          "group": "navigation@2"
+        },
+        {
+          "command": "flaglens.refresh",
+          "when": "view == flaglens.flagsView || view == flaglens.healthView",
+          "group": "navigation@3"
+        },
+        {
+          "command": "flaglens.configureConnection",
+          "when": "view == flaglens.flagsView",
+          "group": "navigation@4"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "flaglens.toggleFlag",
+          "when": "view == flaglens.flagsView && viewItem == flagItem",
+          "group": "inline@1"
+        },
+        {
+          "command": "flaglens.editFlagValue",
+          "when": "view == flaglens.flagsView && viewItem == flagItem",
+          "group": "inline@2"
+        },
+        {
+          "command": "flaglens.openInFlagsmith",
+          "when": "view == flaglens.flagsView && viewItem == flagItem",
+          "group": "inline@3"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "flaglens.wrapInFlag",
+          "when": "editorHasSelection",
+          "group": "navigation@100"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "FlagLens",
+      "properties": {
+        "flaglens.apiUrl": {
+          "type": "string",
+          "default": "http://localhost:8000",
+          "description": "Base URL of your self-hosted Flagsmith instance (e.g. http://localhost:8000)."
+        },
+        "flaglens.apiToken": {
+          "type": "string",
+          "default": "flaglens-dev-token",
+          "description": "Flagsmith Organisation API Key (ser.*) or Admin API Token."
+        },
+        "flaglens.projectId": {
+          "type": "number",
+          "default": 0,
+          "description": "Flagsmith Project ID (0 = auto-select first available project)."
+        },
+        "flaglens.defaultEnvironment": {
+          "type": "string",
+          "default": "Development",
+          "description": "Default environment name to highlight and toggle."
+        },
+        "flaglens.autoRefreshSeconds": {
+          "type": "number",
+          "default": 15,
+          "description": "Interval in seconds to poll Flagsmith for live flag updates (0 = manual only)."
+        },
+        "flaglens.showInlineBadges": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show live ON/OFF and A/B split badges inline next to flag references."
+        },
+        "flaglens.autoStartLocalSandbox": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically start FlagLens's built-in local Flagsmith sandbox on localhost:8000 if no external Flagsmith server is running when VS Code starts."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "node --test tests/core.test.mjs",
+    "package": "npx @vscode/vsce package --allow-missing-repository --no-dependencies --baseContentUrl https://github.com/flaglens-dev/flaglens --baseImagesUrl https://raw.githubusercontent.com/flaglens-dev/flaglens/main",
+    "mock-flagsmith": "node docker/mock-flagsmith.mjs",
+    "demo-app": "node demo-app/server.mjs",
+    "seed": "node docker/seed.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.7.0"
+  }
+}
