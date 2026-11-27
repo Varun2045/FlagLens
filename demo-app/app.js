@@ -7,15 +7,59 @@
  *  3. A yellow squiggly Ghost Flag warning on the intentional typo ("new_chekout")
  */
 
-const FLAGSMITH_API = 'http://localhost:8000/api/v1/flags/';
-const ENVIRONMENT_KEY = 'env_dev_flaglens_local_key';
+const IS_HOSTED_HTTPS =
+  window.location.protocol === 'https:' && window.location.hostname !== 'localhost';
+const URL_PARAMS = new URLSearchParams(window.location.search);
+const CLOUD_ENV_KEY = URL_PARAMS.get('envKey');
+
+const FLAGSMITH_API = CLOUD_ENV_KEY
+  ? 'https://edge.api.flagsmith.com/api/v1/flags/'
+  : 'http://localhost:8000/api/v1/flags/';
+const ENVIRONMENT_KEY = CLOUD_ENV_KEY || 'env_dev_flaglens_local_key';
+
+const HOSTED_PREVIEW_DEFAULTS = {
+  new_checkout: { enabled: true, value: 'express_v2' },
+  pricing_ab_test: { enabled: true, value: 'annual_first' },
+  dark_mode_neon: { enabled: false, value: 'cyber_purple' },
+  promo_banner_copy: {
+    enabled: true,
+    value: 'Toggle Wars 2026 — Live Flagsmith Sync Active!',
+  },
+  legacy_holiday_sale_2024: { enabled: false, value: null },
+};
 
 class MiniFlagsmithSDK {
   constructor() {
     this.flags = {};
     this.prevSnapshot = null;
     this.lastSyncAt = null;
-    this.connectionState = 'connecting'; // 'confirmed' | 'cached' | 'offline'
+    this.connectionState = 'connecting'; // 'confirmed' | 'preview' | 'cached' | 'offline'
+  }
+
+  enableHostedPreview() {
+    if (Object.keys(this.flags).length === 0) {
+      this.flags = JSON.parse(JSON.stringify(HOSTED_PREVIEW_DEFAULTS));
+      this.prevSnapshot = JSON.parse(JSON.stringify(this.flags));
+      logActivity('hosted preview active — click any flag row to toggle');
+    }
+    this.connectionState = 'preview';
+  }
+
+  togglePreviewFlag(name) {
+    if (this.connectionState !== 'preview' || !this.flags[name]) return;
+    if (name === 'pricing_ab_test') {
+      const nextVal =
+        this.flags[name].value === 'monthly_first' ? 'annual_first' : 'monthly_first';
+      this.flags[name].value = nextVal;
+      this.flags[name].enabled = true;
+      logActivity(`preview: pricing_ab_test -> ${nextVal}`);
+      showToast(`Experiment variant: ${nextVal}`);
+    } else {
+      this.flags[name].enabled = !this.flags[name].enabled;
+      logActivity(`preview: ${name} -> ${this.flags[name].enabled ? 'ON' : 'OFF'}`);
+      showToast(`${name} switched ${this.flags[name].enabled ? 'ON' : 'OFF'}`);
+    }
+    renderApp([name]);
   }
 
   async refresh() {
@@ -263,7 +307,12 @@ function renderTelemetry(changedFlags = []) {
   const stateEl = document.getElementById('console-state-label');
   if (flagsmith.connectionState === 'confirmed') {
     stateEl.className = 'console-state-confirmed';
-    stateEl.textContent = 'Server confirmed · localhost:8000';
+    stateEl.textContent = CLOUD_ENV_KEY
+      ? 'Server confirmed · Flagsmith Cloud'
+      : 'Server confirmed · localhost:8000';
+  } else if (flagsmith.connectionState === 'preview') {
+    stateEl.className = 'console-state-confirmed';
+    stateEl.textContent = 'Hosted preview · click any flag to test';
   } else if (flagsmith.connectionState === 'cached') {
     stateEl.className = 'console-state-cached';
     stateEl.textContent = 'Offline · showing cached state';
@@ -279,6 +328,7 @@ function renderTelemetry(changedFlags = []) {
     return;
   }
 
+  const isInteractivePreview = flagsmith.connectionState === 'preview';
   rowsContainer.innerHTML = entries
     .map(([name, st]) => {
       const isChanged = changedFlags.includes(name);
@@ -287,7 +337,7 @@ function renderTelemetry(changedFlags = []) {
           ? `<span class="flag-row-val" title="${escapeHtml(st.value)}">${escapeHtml(st.value)}</span>`
           : '';
       return `
-        <div class="flag-row${isChanged ? ' changed' : ''}" role="listitem">
+        <div class="flag-row${isChanged ? ' changed' : ''}${isInteractivePreview ? ' interactive' : ''}" role="listitem" data-flag-row="${escapeHtml(name)}"${isInteractivePreview ? ' tabindex="0" title="Click to toggle in hosted preview"' : ''}>
           <span class="flag-row-name">${escapeHtml(name)}</span>
           <span class="flag-row-right">
             ${valDisplay}
@@ -300,6 +350,20 @@ function renderTelemetry(changedFlags = []) {
       `;
     })
     .join('');
+
+  if (isInteractivePreview) {
+    rowsContainer.querySelectorAll('[data-flag-row]').forEach((row) => {
+      const name = row.getAttribute('data-flag-row');
+      if (!name) return;
+      row.addEventListener('click', () => flagsmith.togglePreviewFlag(name));
+      row.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          flagsmith.togglePreviewFlag(name);
+        }
+      });
+    });
+  }
 }
 
 // ============================================================================
@@ -416,6 +480,11 @@ document.getElementById('telemetry-toggle-btn')?.addEventListener('click', (e) =
 // ============================================================================
 
 async function pollFlags() {
+  if (IS_HOSTED_HTTPS && !CLOUD_ENV_KEY) {
+    flagsmith.enableHostedPreview();
+    renderApp([]);
+    return;
+  }
   const statusEl = document.getElementById('sync-status');
   const labelEl = document.getElementById('sync-label');
   try {
@@ -439,4 +508,6 @@ async function pollFlags() {
 updatePaymentSelectionUI();
 updateClassicStepUI();
 pollFlags();
-setInterval(pollFlags, 1500);
+if (!IS_HOSTED_HTTPS || CLOUD_ENV_KEY) {
+  setInterval(pollFlags, 1500);
+}

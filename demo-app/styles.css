@@ -1069,6 +1069,15 @@ body.neon {
   padding-left: 8px;
   padding-right: 8px;
 }
+.flag-row.interactive {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding-left: 6px;
+  padding-right: 6px;
+}
+.flag-row.interactive:hover {
+  background: var(--bg-subtle);
+}
 
 .flag-row-name {
   color: var(--text-primary);
