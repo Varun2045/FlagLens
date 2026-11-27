@@ -20,7 +20,9 @@
 | ![Feature Flags Sidebar](docs/screenshots/03-sidebar-explorer.png) | ![Flag Health & Audit](docs/screenshots/04-flag-health-audit.png) |
 
 ### 4. ToggleShop Live Demo App (`http://localhost:3000`)
-![ToggleShop Live Demo App](docs/screenshots/05-toggleshop-live-demo.jpg)
+| Light Editorial (Express Checkout + Annual) | Dark Cyber (3-Step Checkout + Monthly) |
+| :---: | :---: |
+| ![ToggleShop Light Demo](docs/screenshots/05-toggleshop-live-demo.png) | ![ToggleShop Dark Cyber Demo](docs/screenshots/06-toggleshop-dark-classic.png) |
 
 > **Demo Video:** See [DEMO_SCRIPT.md](DEMO_SCRIPT.md) for the full 2-minute walkthrough *(add your YouTube / Loom demo link here before submitting)*.
 

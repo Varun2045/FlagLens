@@ -951,24 +951,25 @@ body.neon {
 }
 
 /* ==========================================================================
-   Developer Telemetry Console (Linear / Vercel Inspector Aesthetic)
+   Developer Telemetry Console (Theme-Harmonized Inspector)
    ========================================================================== */
 .telemetry-console {
-  background: var(--bg-console);
-  color: var(--text-console-primary);
-  border: 1px solid var(--border-console);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+  transition: background-color var(--dur-med) var(--ease-out), border-color var(--dur-med) var(--ease-out);
 }
 
 .console-header {
   width: 100%;
-  padding: 14px 18px;
-  background: transparent;
+  padding: 15px 22px;
+  background: var(--bg-subtle);
   border: none;
-  border-bottom: 1px solid var(--border-console);
-  color: inherit;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-primary);
   font-family: inherit;
   display: flex;
   align-items: center;
@@ -976,9 +977,10 @@ body.neon {
   gap: 12px;
   cursor: pointer;
   text-align: left;
+  transition: background-color var(--dur-fast) ease;
 }
 .console-header:hover {
-  background: rgba(255, 255, 255, 0.025);
+  background: var(--bg-canvas);
 }
 
 .console-title-group {
@@ -986,23 +988,28 @@ body.neon {
   align-items: center;
   gap: 9px;
 }
+.console-title-group svg {
+  color: var(--text-muted);
+}
 .console-title {
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
 .console-count {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--text-console-muted);
+  font-weight: 500;
+  color: var(--text-secondary);
   padding: 2px 7px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
 }
 .console-chevron {
   width: 15px;
   height: 15px;
-  color: var(--text-console-muted);
+  color: var(--text-muted);
   transition: transform var(--dur-fast) ease;
 }
 .telemetry-console.collapsed .console-chevron {
@@ -1013,7 +1020,7 @@ body.neon {
 }
 
 .console-body {
-  padding: 14px 18px 16px;
+  padding: 14px 22px 18px;
 }
 
 .console-meta-bar {
@@ -1022,43 +1029,50 @@ body.neon {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   padding-bottom: 10px;
-  border-bottom: 1px solid var(--border-console);
+  border-bottom: 1px solid var(--border-subtle);
   font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-console-muted);
+  font-size: 11.5px;
+  color: var(--text-muted);
 }
 .console-state-confirmed {
-  color: #34d399;
+  color: var(--status-ok);
+  font-weight: 500;
 }
 .console-state-cached {
-  color: #fbbf24;
+  color: var(--status-warn);
+  font-weight: 500;
 }
 
 .flag-rows {
   display: grid;
-  gap: 4px;
 }
 
 .flag-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
-  padding: 7px 9px;
-  border-radius: var(--radius-sm);
-  background: var(--bg-console-row);
+  gap: 12px;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--border-subtle);
   font-family: var(--font-mono);
   font-size: 12px;
   transition: background-color 300ms ease;
 }
+.flag-row:last-child {
+  border-bottom: none;
+}
 .flag-row.changed {
-  background: rgba(56, 189, 248, 0.16);
+  background: var(--brand-soft);
+  border-radius: var(--radius-sm);
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 .flag-row-name {
-  color: var(--text-console-primary);
+  color: var(--text-primary);
+  font-weight: 500;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1066,13 +1080,13 @@ body.neon {
 .flag-row-right {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
 }
 .flag-row-val {
-  font-size: 11px;
-  color: var(--text-console-muted);
-  max-width: 110px;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  max-width: 112px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1083,12 +1097,14 @@ body.neon {
   gap: 5px;
   font-size: 11px;
   font-weight: 600;
+  min-width: 34px;
+  justify-content: flex-end;
 }
 .flag-state-pill.on {
-  color: #34d399;
+  color: var(--status-ok);
 }
 .flag-state-pill.off {
-  color: #6b7280;
+  color: var(--text-muted);
 }
 .flag-state-dot {
   width: 6px;
@@ -1098,12 +1114,14 @@ body.neon {
 }
 
 .console-log {
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border-console);
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--text-console-muted);
+  color: var(--text-muted);
   display: grid;
   gap: 4px;
 }

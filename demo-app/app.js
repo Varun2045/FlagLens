@@ -420,14 +420,18 @@ async function pollFlags() {
   const labelEl = document.getElementById('sync-label');
   try {
     const changedFlags = await flagsmith.refresh();
-    statusEl.className = 'sync-indicator live';
-    labelEl.textContent = 'Live · localhost:8000';
+    if (statusEl && labelEl) {
+      statusEl.className = 'sync-indicator live';
+      labelEl.textContent = 'Live · localhost:8000';
+    }
     renderApp(changedFlags);
   } catch (err) {
     const hasCache = Object.keys(flagsmith.flags).length > 0;
     flagsmith.connectionState = hasCache ? 'cached' : 'offline';
-    statusEl.className = 'sync-indicator offline';
-    labelEl.textContent = hasCache ? 'Cached · Offline' : 'Offline';
+    if (statusEl && labelEl) {
+      statusEl.className = 'sync-indicator offline';
+      labelEl.textContent = hasCache ? 'Cached · Offline' : 'Offline';
+    }
     renderTelemetry([]);
   }
 }

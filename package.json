@@ -6,6 +6,14 @@
   "publisher": "flaglens-dev",
   "icon": "media/icon.png",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Varun2045/FlagLens.git"
+  },
+  "homepage": "https://github.com/Varun2045/FlagLens#readme",
+  "bugs": {
+    "url": "https://github.com/Varun2045/FlagLens/issues"
+  },
   "keywords": [
     "flagsmith",
     "feature-flags",
@@ -191,7 +199,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "test": "node --test tests/core.test.mjs",
-    "package": "npx @vscode/vsce package --allow-missing-repository --no-dependencies --baseContentUrl https://github.com/flaglens-dev/flaglens --baseImagesUrl https://raw.githubusercontent.com/flaglens-dev/flaglens/main",
+    "package": "npx @vscode/vsce package --no-dependencies --baseContentUrl https://github.com/Varun2045/FlagLens --baseImagesUrl https://raw.githubusercontent.com/Varun2045/FlagLens/main",
     "mock-flagsmith": "node docker/mock-flagsmith.mjs",
     "demo-app": "node demo-app/server.mjs",
     "seed": "node docker/seed.mjs"
