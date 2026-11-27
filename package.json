@@ -3,7 +3,7 @@
   "displayName": "FlagLens — Flagsmith Live Feature Flags",
   "description": "Live inline feature flag status, 1-click toggles, wrap-in-flag code actions, and typo/stale flag auditing for self-hosted Flagsmith right inside VS Code.",
   "version": "1.0.0",
-  "publisher": "flaglens-dev",
+  "publisher": "varun2045",
   "icon": "media/icon.png",
   "license": "MIT",
   "repository": {
