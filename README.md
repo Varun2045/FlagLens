@@ -17,6 +17,25 @@
 
 ---
 
+## Live Links & Installation
+
+| Resource | Link |
+| :--- | :--- |
+| **VS Code Marketplace** | *[Add VS Code Marketplace URL here]* *(or install [`flaglens-1.0.0.vsix`](flaglens-1.0.0.vsix))* |
+| **Live Demo Storefront (Vercel)** | *[Add Vercel Deployment URL here]* |
+| **Demo Video (2 min)** | *[Add YouTube / Loom Demo Video URL here]* |
+
+---
+
+## VS Code Marketplace
+
+Install **FlagLens** directly from the Visual Studio Code Marketplace (or via `code --install-extension flaglens-1.0.0.vsix`):
+
+<!-- Paste Marketplace screenshot at docs/screenshots/07-vscode-marketplace.png -->
+> *VS Code Marketplace screenshot coming soon — upload to `docs/screenshots/07-vscode-marketplace.png`.*
+
+---
+
 ## Overview
 
 Shipping features behind feature flags usually forces engineers to constantly alt-tab between their editor and the Flagsmith dashboard just to check whether a flag is enabled in Development vs. Production, inspect multivariate A/B split weights, verify spelling, or hunt down stale flags.
