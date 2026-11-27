@@ -14,6 +14,8 @@ class MiniFlagsmithSDK {
   constructor() {
     this.flags = {};
     this.prevSnapshot = null;
+    this.lastSyncAt = null;
+    this.connectionState = 'connecting'; // 'confirmed' | 'cached' | 'offline'
   }
 
   async refresh() {
@@ -33,29 +35,37 @@ class MiniFlagsmithSDK {
         };
       }
     }
-    this.detectChanges(map);
+    const changedFlags = this.detectChanges(map);
     this.flags = map;
+    this.lastSyncAt = new Date();
+    this.connectionState = 'confirmed';
+    return changedFlags;
   }
 
   detectChanges(nextMap) {
+    const changed = [];
     if (!this.prevSnapshot) {
       this.prevSnapshot = nextMap;
       logActivity(`synced ${Object.keys(nextMap).length} flags from localhost:8000`);
-      return;
+      return changed;
     }
     for (const [name, state] of Object.entries(nextMap)) {
       const prev = this.prevSnapshot[name];
       if (!prev) {
+        changed.push(name);
         logActivity(`created ${name} (${state.enabled ? 'ON' : 'OFF'})`);
       } else if (prev.enabled !== state.enabled) {
+        changed.push(name);
         logActivity(`${name} -> ${state.enabled ? 'ON' : 'OFF'}`);
         showToast(`${name} switched ${state.enabled ? 'ON' : 'OFF'}`);
       } else if (prev.value !== state.value) {
+        changed.push(name);
         logActivity(`${name} value -> "${state.value}"`);
         showToast(`Updated ${name}`);
       }
     }
     this.prevSnapshot = nextMap;
+    return changed;
   }
 
   hasFeature(name) {
@@ -69,7 +79,21 @@ class MiniFlagsmithSDK {
 
 const flagsmith = new MiniFlagsmithSDK();
 const activityLog = [];
+const uiState = {
+  selectedPayment: 'visa', // 'visa' | 'mastercard' | 'new_card'
+  classicStep: 1,          // 1 | 2 | 3
+  isSubmitting: false,
+};
 let toastTimer = null;
+
+function formatTime(date) {
+  return date.toLocaleTimeString([], {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+}
 
 function showToast(message) {
   const el = document.getElementById('toast');
@@ -77,76 +101,145 @@ function showToast(message) {
   el.textContent = message;
   el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
 }
 
 function logActivity(message) {
-  const time = new Date().toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  });
-  activityLog.unshift(`${time}  ${message}`);
+  activityLog.unshift(`${formatTime(new Date())}  ${message}`);
   if (activityLog.length > 4) activityLog.pop();
   const box = document.getElementById('activity-feed');
   if (box) {
-    box.innerHTML = activityLog.map((line) => `<div class="log-entry">${line}</div>`).join('');
+    box.innerHTML = activityLog
+      .map((line) => `<div class="console-log-entry">${escapeHtml(line)}</div>`)
+      .join('');
   }
 }
 
-function renderApp() {
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function flashElement(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('region-flash');
+  void el.offsetWidth;
+  el.classList.add('region-flash');
+}
+
+function updateClassicStepUI() {
+  document.querySelectorAll('.step-btn').forEach((btn) => {
+    const step = Number(btn.getAttribute('data-step'));
+    btn.classList.toggle('active', step === uiState.classicStep);
+    btn.classList.toggle('done', step < uiState.classicStep);
+    btn.setAttribute('aria-selected', String(step === uiState.classicStep));
+  });
+  document.querySelectorAll('.classic-step').forEach((panel) => {
+    const step = Number(panel.getAttribute('data-step-panel'));
+    panel.classList.toggle('hidden', step !== uiState.classicStep);
+  });
+  updatePrimaryActionLabels();
+}
+
+function updatePaymentSelectionUI() {
+  document.querySelectorAll('.payment-option').forEach((btn) => {
+    const method = btn.getAttribute('data-payment');
+    btn.setAttribute('aria-checked', String(method === uiState.selectedPayment));
+  });
+  const newCardForm = document.getElementById('express-new-card-form');
+  if (newCardForm) {
+    newCardForm.classList.toggle('hidden', uiState.selectedPayment !== 'new_card');
+  }
+}
+
+function updatePrimaryActionLabels() {
+  const isMonthly = flagsmith.getValue('pricing_ab_test') === 'monthly_first';
+  const showExpress = flagsmith.hasFeature('new_checkout');
+  const dueText = isMonthly ? '$24.00' : '$228.00';
+
+  const payLabel = document.getElementById('primary-pay-label');
+  const secondaryBtn = document.getElementById('secondary-action-btn');
+
+  if (showExpress) {
+    payLabel.textContent = `Pay ${dueText} with Express Checkout`;
+    secondaryBtn.textContent =
+      uiState.selectedPayment === 'new_card'
+        ? 'Use saved Visa ending in 4242'
+        : 'Use a different payment method';
+  } else {
+    if (uiState.classicStep < 3) {
+      const nextStepName = uiState.classicStep === 1 ? 'Billing Address' : 'Card Details';
+      payLabel.textContent = `Continue to ${nextStepName}`;
+      secondaryBtn.textContent =
+        uiState.classicStep === 1 ? 'Reset form fields' : 'Back to previous step';
+    } else {
+      payLabel.textContent = `Complete Order (${dueText})`;
+      secondaryBtn.textContent = 'Back to Billing Address';
+    }
+  }
+}
+
+function renderApp(changedFlags = []) {
   // 1. Promo Banner (Remote Config)
   const bannerEl = document.getElementById('promo-banner');
+  const bannerTextEl = document.getElementById('promo-banner-text');
   const showBanner = flagsmith.hasFeature('promo_banner_copy');
   const bannerText = flagsmith.getValue('promo_banner_copy');
   bannerEl.classList.toggle('visible', showBanner);
-  bannerEl.textContent = bannerText || 'ToggleShop Studio';
+  bannerTextEl.textContent = bannerText || 'ToggleShop Studio Pro';
 
   // 2. Pricing Experiment (Multivariate A/B Test)
   const pricingVariant = flagsmith.getValue('pricing_ab_test');
   const isMonthly = pricingVariant === 'monthly_first';
 
-  document.getElementById('pricing-title').textContent = isMonthly ? 'Pro Monthly' : 'Pro Annual';
-  document.getElementById('pricing-price').innerHTML = isMonthly
-    ? '$24<span>/mo</span>'
-    : '$19<span>/mo</span>';
-  document.getElementById('pricing-desc').textContent = isMonthly
-    ? 'Flexible month-to-month billing. Cancel or switch tiers anytime.'
-    : 'Billed annually ($228/yr). Save 20% compared to monthly billing.';
-  document.getElementById('pricing-badge').textContent = isMonthly
-    ? 'variant: monthly_first'
-    : 'variant: annual_first';
+  document.getElementById('pricing-variant-chip').textContent = isMonthly
+    ? 'monthly_first'
+    : 'annual_first';
+
+  const annualCard = document.getElementById('cadence-annual');
+  const monthlyCard = document.getElementById('cadence-monthly');
+  const cadenceList = document.getElementById('cadence-list');
+  annualCard.classList.toggle('recommended', !isMonthly);
+  monthlyCard.classList.toggle('recommended', isMonthly);
+  // Visually order the experiment's primary option first
+  if (isMonthly) {
+    cadenceList.appendChild(monthlyCard);
+    cadenceList.appendChild(annualCard);
+  } else {
+    cadenceList.appendChild(annualCard);
+    cadenceList.appendChild(monthlyCard);
+  }
 
   document.getElementById('sum-plan-name').textContent = isMonthly
-    ? 'Flagsmith Studio Pro (Monthly)'
-    : 'Flagsmith Studio Pro (Annual)';
-  document.getElementById('sum-plan-price').textContent = isMonthly ? '$24.00/mo' : '$19.00/mo';
+    ? 'ToggleShop Studio Pro (Monthly)'
+    : 'ToggleShop Studio Pro (Annual)';
+  document.getElementById('sum-plan-rate').textContent = isMonthly ? '$24.00 / mo' : '$19.00 / mo';
+  document.getElementById('sum-cycle').textContent = isMonthly
+    ? 'Billed monthly (cancel anytime)'
+    : 'Billed annually (12 months)';
+  document.getElementById('sum-savings-row').classList.toggle('hidden', isMonthly);
   document.getElementById('sum-due-today').textContent = isMonthly ? '$24.00' : '$228.00';
-  document.getElementById('express-pay-btn').textContent = isMonthly
-    ? 'Pay $24.00 in 1 Click'
-    : 'Pay $228.00 in 1 Click';
+
+  if (changedFlags.includes('pricing_ab_test')) {
+    flashElement('pricing-region');
+  }
 
   // 3. Express Checkout Feature Flag
   const showExpressCheckout = flagsmith.hasFeature('new_checkout');
-  const checkoutBadge = document.getElementById('checkout-badge');
-  const checkoutTitle = document.getElementById('checkout-title');
-  const expressView = document.getElementById('express-view');
-  const classicView = document.getElementById('classic-view');
+  document.getElementById('express-view').classList.toggle('hidden', !showExpressCheckout);
+  document.getElementById('classic-view').classList.toggle('hidden', showExpressCheckout);
 
-  checkoutBadge.className = showExpressCheckout ? 'flag-tag on' : 'flag-tag';
-  checkoutBadge.textContent = showExpressCheckout ? 'new_checkout: ON' : 'new_checkout: OFF';
-  checkoutTitle.textContent = showExpressCheckout ? 'Express Checkout' : 'Standard Checkout';
-  expressView.classList.toggle('hidden', !showExpressCheckout);
-  classicView.classList.toggle('hidden', showExpressCheckout);
+  if (changedFlags.includes('new_checkout')) {
+    flashElement('checkout-region');
+  }
 
-  // 4. Dark Mode Toggle (Light Editorial <-> OLED Obsidian)
+  // 4. Dark / Cyber Theme Toggle
   const isDarkMode = flagsmith.hasFeature('dark_mode_neon');
   document.body.classList.toggle('neon', isDarkMode);
-  const themeChip = document.getElementById('theme-indicator');
-  if (themeChip) {
-    themeChip.textContent = isDarkMode ? 'theme: dark' : 'theme: light';
-  }
 
   // 5. Intentional Typo Demo — FlagLens highlights this with a Quick Fix ("new_checkout")!
   const legacyCheck = flagsmith.hasFeature('new_chekout');
@@ -154,45 +247,192 @@ function renderApp() {
     console.log('Legacy checkout path active');
   }
 
-  // Update Live Telemetry Table
+  updatePrimaryActionLabels();
+  renderTelemetry(changedFlags);
+}
+
+function renderTelemetry(changedFlags = []) {
   const entries = Object.entries(flagsmith.flags);
   const onCount = entries.filter(([, s]) => s.enabled).length;
-  document.getElementById('active-count').textContent = `${onCount}/${entries.length} ON`;
-  document.getElementById('telemetry-body').innerHTML = entries
-    .map(
-      ([name, st]) =>
-        `<tr><td class="t-name">${name}</td><td class="t-state ${st.enabled ? 't-on' : 't-off'}">${
-          st.enabled ? 'ON' : 'OFF'
-        }</td></tr>`
-    )
+
+  document.getElementById('active-count').textContent = `${onCount}/${entries.length} active`;
+  document.getElementById('console-last-sync').textContent = flagsmith.lastSyncAt
+    ? `Synced ${formatTime(flagsmith.lastSyncAt)}`
+    : 'Last sync: —';
+
+  const stateEl = document.getElementById('console-state-label');
+  if (flagsmith.connectionState === 'confirmed') {
+    stateEl.className = 'console-state-confirmed';
+    stateEl.textContent = 'Server confirmed · localhost:8000';
+  } else if (flagsmith.connectionState === 'cached') {
+    stateEl.className = 'console-state-cached';
+    stateEl.textContent = 'Offline · showing cached state';
+  } else {
+    stateEl.className = 'console-state-cached';
+    stateEl.textContent = 'Unavailable · waiting for localhost:8000';
+  }
+
+  const rowsContainer = document.getElementById('telemetry-rows');
+  if (!entries.length) {
+    rowsContainer.innerHTML =
+      '<div class="flag-row" role="listitem"><span class="flag-row-name">No flags loaded</span><span class="flag-state-pill off">—</span></div>';
+    return;
+  }
+
+  rowsContainer.innerHTML = entries
+    .map(([name, st]) => {
+      const isChanged = changedFlags.includes(name);
+      const valDisplay =
+        st.value !== null && st.value !== undefined && String(st.value).length > 0
+          ? `<span class="flag-row-val" title="${escapeHtml(st.value)}">${escapeHtml(st.value)}</span>`
+          : '';
+      return `
+        <div class="flag-row${isChanged ? ' changed' : ''}" role="listitem">
+          <span class="flag-row-name">${escapeHtml(name)}</span>
+          <span class="flag-row-right">
+            ${valDisplay}
+            <span class="flag-state-pill ${st.enabled ? 'on' : 'off'}">
+              <span class="flag-state-dot" aria-hidden="true"></span>
+              ${st.enabled ? 'ON' : 'OFF'}
+            </span>
+          </span>
+        </div>
+      `;
+    })
     .join('');
 }
 
-document.getElementById('express-pay-btn')?.addEventListener('click', () => {
-  showToast('Payment confirmed in 0.4s via Express Checkout');
+// ============================================================================
+// Interactive Event Listeners
+// ============================================================================
+
+document.querySelectorAll('.payment-option').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    uiState.selectedPayment = btn.getAttribute('data-payment') || 'visa';
+    updatePaymentSelectionUI();
+    updatePrimaryActionLabels();
+  });
 });
 
-document.getElementById('classic-pay-btn')?.addEventListener('click', () => {
-  showToast('Proceeding to Step 2 of 4 (Billing Address)');
+document.querySelectorAll('.step-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    uiState.classicStep = Number(btn.getAttribute('data-step')) || 1;
+    updateClassicStepUI();
+  });
 });
 
-document.getElementById('pricing-btn')?.addEventListener('click', () => {
-  showToast(`Active experiment variant: ${flagsmith.getValue('pricing_ab_test') || 'annual_first'}`);
+document.getElementById('primary-pay-btn')?.addEventListener('click', () => {
+  if (uiState.isSubmitting) return;
+  const showExpress = flagsmith.hasFeature('new_checkout');
+
+  if (!showExpress && uiState.classicStep < 3) {
+    uiState.classicStep += 1;
+    updateClassicStepUI();
+    return;
+  }
+
+  // Simulated checkout submission with realistic loading state
+  uiState.isSubmitting = true;
+  const payBtn = document.getElementById('primary-pay-btn');
+  const payLabel = document.getElementById('primary-pay-label');
+  payBtn.disabled = true;
+  payLabel.innerHTML = '<span class="spinner" aria-hidden="true"></span> Processing demo order...';
+
+  setTimeout(() => {
+    uiState.isSubmitting = false;
+    payBtn.disabled = false;
+    updatePrimaryActionLabels();
+
+    const isMonthly = flagsmith.getValue('pricing_ab_test') === 'monthly_first';
+    const methodLabel = !showExpress
+      ? 'Card ending in 4242'
+      : uiState.selectedPayment === 'mastercard'
+      ? 'Mastercard ending in 8819'
+      : uiState.selectedPayment === 'new_card'
+      ? 'New card (demo)'
+      : 'Visa ending in 4242';
+
+    document.getElementById('receipt-flow').textContent = showExpress
+      ? 'Express (new_checkout: ON)'
+      : 'Standard 3-Step (new_checkout: OFF)';
+    document.getElementById('receipt-plan').textContent = isMonthly
+      ? 'Pro Monthly ($24.00)'
+      : 'Pro Annual ($228.00)';
+    document.getElementById('receipt-method').textContent = methodLabel;
+
+    document.getElementById('checkout-active-flow').classList.add('hidden');
+    document.getElementById('receipt-view').classList.remove('hidden');
+    logActivity(`simulated checkout completed (${showExpress ? 'express' : 'standard'})`);
+    showToast('Simulated checkout confirmed');
+  }, 600);
 });
+
+document.getElementById('secondary-action-btn')?.addEventListener('click', () => {
+  const showExpress = flagsmith.hasFeature('new_checkout');
+  if (showExpress) {
+    uiState.selectedPayment = uiState.selectedPayment === 'new_card' ? 'visa' : 'new_card';
+    updatePaymentSelectionUI();
+    updatePrimaryActionLabels();
+    if (uiState.selectedPayment === 'new_card') {
+      document.getElementById('express-card-number')?.focus();
+    }
+  } else {
+    if (uiState.classicStep > 1) {
+      uiState.classicStep -= 1;
+      updateClassicStepUI();
+    } else {
+      showToast('Form is already on Step 1');
+    }
+  }
+});
+
+document.getElementById('reset-checkout-btn')?.addEventListener('click', () => {
+  uiState.classicStep = 1;
+  updateClassicStepUI();
+  document.getElementById('receipt-view').classList.add('hidden');
+  document.getElementById('checkout-active-flow').classList.remove('hidden');
+});
+
+document.getElementById('compare-tiers-btn')?.addEventListener('click', (e) => {
+  const btn = e.currentTarget;
+  const drawer = document.getElementById('compare-drawer');
+  const isOpen = !drawer.classList.contains('hidden');
+  drawer.classList.toggle('hidden', isOpen);
+  btn.setAttribute('aria-expanded', String(!isOpen));
+  btn.textContent = isOpen ? 'Compare all plans' : 'Hide plan comparison';
+});
+
+document.getElementById('telemetry-toggle-btn')?.addEventListener('click', (e) => {
+  const btn = e.currentTarget;
+  const consoleEl = document.getElementById('telemetry-console');
+  const bodyEl = document.getElementById('telemetry-body-wrap');
+  const collapsed = consoleEl.classList.toggle('collapsed');
+  bodyEl.classList.toggle('hidden', collapsed);
+  btn.setAttribute('aria-expanded', String(!collapsed));
+});
+
+// ============================================================================
+// Live Flagsmith Polling Loop
+// ============================================================================
 
 async function pollFlags() {
   const statusEl = document.getElementById('sync-status');
   const labelEl = document.getElementById('sync-label');
   try {
-    await flagsmith.refresh();
-    statusEl.className = 'status-chip live';
-    labelEl.textContent = 'localhost:8000';
-    renderApp();
+    const changedFlags = await flagsmith.refresh();
+    statusEl.className = 'sync-indicator live';
+    labelEl.textContent = 'Live · localhost:8000';
+    renderApp(changedFlags);
   } catch (err) {
-    statusEl.className = 'status-chip offline';
-    labelEl.textContent = 'offline';
+    const hasCache = Object.keys(flagsmith.flags).length > 0;
+    flagsmith.connectionState = hasCache ? 'cached' : 'offline';
+    statusEl.className = 'sync-indicator offline';
+    labelEl.textContent = hasCache ? 'Cached · Offline' : 'Offline';
+    renderTelemetry([]);
   }
 }
 
+updatePaymentSelectionUI();
+updateClassicStepUI();
 pollFlags();
 setInterval(pollFlags, 1500);

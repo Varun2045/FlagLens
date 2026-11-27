@@ -3,662 +3,487 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ToggleShop — Checkout</title>
+    <title>ToggleShop — Upgrade to Studio Pro</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <style>
-      :root {
-        --bg: #fafafa;
-        --surface: #ffffff;
-        --surface-subtle: #f4f4f5;
-        --border: #e4e4e7;
-        --border-strong: #d4d4d8;
-        --text: #09090b;
-        --text-secondary: #52525b;
-        --text-muted: #71717a;
-        --ink-btn: #09090b;
-        --ink-btn-text: #ffffff;
-        --ink-btn-hover: #27272a;
-        --banner-bg: #09090b;
-        --banner-text: #fafafa;
-        --ok: #16a34a;
-        --ok-bg: #f0fdf4;
-        --ok-border: #bbf7d0;
-        --accent: #2563eb;
-        --accent-bg: #eff6ff;
-        --accent-border: #bfdbfe;
-        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-      }
-
-      body.neon {
-        --bg: #09090b;
-        --surface: #111114;
-        --surface-subtle: #18181b;
-        --border: #27272a;
-        --border-strong: #3f3f46;
-        --text: #fafafa;
-        --text-secondary: #a1a1aa;
-        --text-muted: #71717a;
-        --ink-btn: #fafafa;
-        --ink-btn-text: #09090b;
-        --ink-btn-hover: #e4e4e7;
-        --banner-bg: #18181b;
-        --banner-text: #e4e4e7;
-        --ok: #4ade80;
-        --ok-bg: rgba(34, 197, 94, 0.1);
-        --ok-border: rgba(34, 197, 94, 0.25);
-        --accent: #60a5fa;
-        --accent-bg: rgba(59, 130, 246, 0.12);
-        --accent-border: rgba(59, 130, 246, 0.28);
-        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        background: var(--bg);
-        color: var(--text);
-        min-height: 100vh;
-        -webkit-font-smoothing: antialiased;
-        transition: background-color 0.25s ease, color 0.25s ease;
-      }
-
-      /* Top Announcement Bar */
-      .banner {
-        background: var(--banner-bg);
-        color: var(--banner-text);
-        border-bottom: 1px solid var(--border);
-        font-size: 12.5px;
-        font-weight: 500;
-        text-align: center;
-        padding: 8px 16px;
-        letter-spacing: -0.01em;
-        display: none;
-      }
-      .banner.visible {
-        display: block;
-      }
-
-      /* Minimal Top Bar */
-      header {
-        border-bottom: 1px solid var(--border);
-        background: var(--surface);
-      }
-      .header-inner {
-        max-width: 1040px;
-        margin: 0 auto;
-        padding: 14px 24px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-weight: 600;
-        font-size: 15px;
-        letter-spacing: -0.02em;
-      }
-      .brand-dot {
-        width: 18px;
-        height: 18px;
-        border-radius: 5px;
-        background: var(--text);
-        position: relative;
-      }
-      .brand-dot::after {
-        content: '';
-        position: absolute;
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--surface);
-        right: 3px;
-        top: 6px;
-      }
-      .brand-sep {
-        color: var(--border-strong);
-        font-weight: 400;
-      }
-      .brand-sub {
-        color: var(--text-muted);
-        font-weight: 400;
-        font-size: 13.5px;
-      }
-
-      .status-bar {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .status-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 11.5px;
-        font-weight: 500;
-        padding: 4px 10px;
-        border-radius: 6px;
-        border: 1px solid var(--border);
-        background: var(--surface-subtle);
-        color: var(--text-secondary);
-      }
-      .status-chip.live {
-        background: var(--ok-bg);
-        border-color: var(--ok-border);
-        color: var(--ok);
-      }
-      .status-chip.offline {
-        color: #d97706;
-        border-color: rgba(217, 119, 6, 0.35);
-      }
-      .live-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: currentColor;
-      }
-
-      /* Main 2-Column Workspace */
-      main {
-        max-width: 1040px;
-        margin: 0 auto;
-        padding: 36px 24px 72px;
-        display: grid;
-        grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.95fr);
-        gap: 28px;
-        align-items: start;
-      }
-      @media (max-width: 820px) {
-        main {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      .panel {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        box-shadow: var(--shadow-sm);
-        overflow: hidden;
-      }
-      .panel-header {
-        padding: 18px 22px;
-        border-bottom: 1px solid var(--border);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-      }
-      .panel-title {
-        font-size: 14px;
-        font-weight: 600;
-        letter-spacing: -0.01em;
-        margin: 0;
-      }
-      .panel-body {
-        padding: 22px;
-      }
-
-      .flag-tag {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 11px;
-        font-weight: 500;
-        padding: 3px 8px;
-        border-radius: 5px;
-        border: 1px solid var(--border);
-        background: var(--surface-subtle);
-        color: var(--text-secondary);
-      }
-      .flag-tag.on {
-        background: var(--ok-bg);
-        border-color: var(--ok-border);
-        color: var(--ok);
-      }
-      .flag-tag.exp {
-        background: var(--accent-bg);
-        border-color: var(--accent-border);
-        color: var(--accent);
-      }
-
-      /* Express Checkout View */
-      .saved-card {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 14px 16px;
-        border-radius: 9px;
-        border: 1px solid var(--border);
-        background: var(--surface-subtle);
-        margin-bottom: 18px;
-      }
-      .saved-card-left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-      .card-brand {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 11px;
-        font-weight: 600;
-        padding: 4px 7px;
-        border-radius: 4px;
-        border: 1px solid var(--border-strong);
-        background: var(--surface);
-        color: var(--text);
-      }
-      .saved-card-meta {
-        font-size: 13.5px;
-        font-weight: 500;
-      }
-      .saved-card-sub {
-        font-size: 12px;
-        color: var(--text-muted);
-        margin-top: 2px;
-      }
-
-      .summary-rows {
-        display: grid;
-        gap: 10px;
-        padding: 16px 0;
-        border-top: 1px solid var(--border);
-        border-bottom: 1px solid var(--border);
-        margin-bottom: 18px;
-        font-size: 13.5px;
-      }
-      .summary-row {
-        display: flex;
-        justify-content: space-between;
-        color: var(--text-secondary);
-      }
-      .summary-row.total {
-        color: var(--text);
-        font-weight: 600;
-        font-size: 14.5px;
-        padding-top: 6px;
-        border-top: 1px dashed var(--border);
-      }
-      .mono {
-        font-family: 'JetBrains Mono', monospace;
-        font-variant-numeric: tabular-nums;
-      }
-
-      /* Classic Multi-Step Form */
-      .steps-bar {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 18px;
-        font-size: 12px;
-        color: var(--text-muted);
-      }
-      .step-pill {
-        padding: 4px 10px;
-        border-radius: 6px;
-        border: 1px solid var(--border);
-        background: var(--surface-subtle);
-      }
-      .step-pill.current {
-        color: var(--text);
-        font-weight: 600;
-        border-color: var(--border-strong);
-        background: var(--surface);
-      }
-      .form-grid {
-        display: grid;
-        gap: 14px;
-        margin-bottom: 18px;
-      }
-      .form-row-2 {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-      }
-      label {
-        display: block;
-        font-size: 12px;
-        font-weight: 500;
-        color: var(--text-secondary);
-        margin-bottom: 6px;
-      }
-      input {
-        width: 100%;
-        padding: 9px 12px;
-        border-radius: 8px;
-        border: 1px solid var(--border-strong);
-        background: var(--surface);
-        color: var(--text);
-        font-family: inherit;
-        font-size: 13.5px;
-        outline: none;
-        transition: border-color 0.15s ease;
-      }
-      input:focus {
-        border-color: var(--text);
-      }
-
-      /* Buttons */
-      .btn-primary {
-        width: 100%;
-        padding: 11px 16px;
-        border-radius: 8px;
-        border: 1px solid transparent;
-        background: var(--ink-btn);
-        color: var(--ink-btn-text);
-        font-family: inherit;
-        font-size: 13.5px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.15s ease, transform 0.1s ease;
-      }
-      .btn-primary:hover {
-        background: var(--ink-btn-hover);
-      }
-      .btn-primary:active {
-        transform: scale(0.995);
-      }
-      .btn-ghost {
-        width: 100%;
-        margin-top: 8px;
-        padding: 9px 14px;
-        border-radius: 8px;
-        border: 1px solid var(--border);
-        background: transparent;
-        color: var(--text-secondary);
-        font-family: inherit;
-        font-size: 13px;
-        font-weight: 500;
-        cursor: pointer;
-      }
-      .btn-ghost:hover {
-        background: var(--surface-subtle);
-        color: var(--text);
-      }
-
-      /* Plan Card (Right Column) */
-      .stack {
-        display: grid;
-        gap: 20px;
-      }
-      .plan-option {
-        padding: 16px;
-        border-radius: 9px;
-        border: 1.5px solid var(--text);
-        background: var(--surface-subtle);
-        margin-bottom: 14px;
-      }
-      .plan-top {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        margin-bottom: 6px;
-      }
-      .plan-name {
-        font-size: 14.5px;
-        font-weight: 600;
-      }
-      .plan-price {
-        font-size: 22px;
-        font-weight: 700;
-        letter-spacing: -0.03em;
-      }
-      .plan-price span {
-        font-size: 12.5px;
-        font-weight: 400;
-        color: var(--text-muted);
-      }
-      .plan-desc {
-        font-size: 12.5px;
-        color: var(--text-secondary);
-        margin: 0 0 12px;
-        line-height: 1.5;
-      }
-      .plan-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: grid;
-        gap: 6px;
-        font-size: 12.5px;
-        color: var(--text-secondary);
-      }
-      .plan-list li {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .check {
-        color: var(--ok);
-        font-weight: 700;
-      }
-
-      /* Compact Flag Telemetry Console */
-      .telemetry-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 11.5px;
-      }
-      .telemetry-table td {
-        padding: 7px 0;
-        border-bottom: 1px solid var(--border);
-      }
-      .telemetry-table tr:last-child td {
-        border-bottom: none;
-      }
-      .t-name {
-        color: var(--text);
-        font-weight: 500;
-      }
-      .t-state {
-        text-align: right;
-      }
-      .t-on {
-        color: var(--ok);
-        font-weight: 600;
-      }
-      .t-off {
-        color: var(--text-muted);
-      }
-
-      .log-box {
-        margin-top: 14px;
-        padding-top: 12px;
-        border-top: 1px solid var(--border);
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 11px;
-        color: var(--text-muted);
-        display: grid;
-        gap: 5px;
-      }
-      .log-entry {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      /* Minimal Toast */
-      .toast {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: var(--text);
-        color: var(--surface);
-        padding: 10px 15px;
-        border-radius: 8px;
-        font-size: 12.5px;
-        font-weight: 500;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        opacity: 0;
-        transform: translateY(8px);
-        pointer-events: none;
-        transition: opacity 0.2s ease, transform 0.2s ease;
-        z-index: 50;
-      }
-      .toast.show {
-        opacity: 1;
-        transform: translateY(0);
-      }
-
-      .hidden {
-        display: none !important;
-      }
-    </style>
+    <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <div id="promo-banner" class="banner"></div>
+    <!-- Promotional Banner (`promo_banner_copy`) -->
+    <div id="promo-banner" class="promo-bar" role="region" aria-label="Announcement">
+      <div class="promo-inner">
+        <span class="promo-dot" aria-hidden="true"></span>
+        <span id="promo-banner-text"></span>
+      </div>
+    </div>
 
-    <header>
+    <!-- Commercial Navigation Header -->
+    <header class="site-header">
       <div class="header-inner">
-        <div class="brand">
-          <div class="brand-dot"></div>
-          <span>ToggleShop</span>
-          <span class="brand-sep">/</span>
-          <span class="brand-sub">Checkout</span>
+        <div class="header-left">
+          <a href="#" class="brand-link" aria-label="ToggleShop Home">
+            <!-- Bespoke ToggleShop Switch Mark -->
+            <svg
+              class="brand-logo"
+              viewBox="0 0 28 28"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <rect x="2" y="4" width="24" height="9" rx="4.5" stroke="currentColor" stroke-width="2" />
+              <circle cx="21.5" cy="8.5" r="2.5" fill="currentColor" />
+              <rect x="2" y="15" width="24" height="9" rx="4.5" stroke="currentColor" stroke-width="2" opacity="0.4" />
+              <circle cx="6.5" cy="19.5" r="2.5" fill="currentColor" opacity="0.55" />
+            </svg>
+            <span>ToggleShop</span>
+          </a>
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <span>Billing</span>
+            <span aria-hidden="true">/</span>
+            <span class="breadcrumb-current">Studio Pro Checkout</span>
+          </nav>
         </div>
-        <div class="status-bar">
-          <span id="theme-indicator" class="status-chip">theme: light</span>
-          <span id="sync-status" class="status-chip live">
-            <span class="live-dot"></span>
-            <span id="sync-label">localhost:8000</span>
+
+        <div class="header-right">
+          <span id="env-indicator" class="env-indicator" title="Active Flagsmith environment">
+            env: development
           </span>
+          <div id="sync-status" class="sync-indicator" role="status" aria-live="polite">
+            <span class="sync-dot" aria-hidden="true"></span>
+            <span id="sync-label">Connecting...</span>
+          </div>
         </div>
       </div>
     </header>
 
-    <main>
-      <!-- Left Column: Live Checkout Experience -->
-      <section class="panel">
-        <div class="panel-header">
-          <h1 id="checkout-title" class="panel-title">Express Checkout</h1>
-          <span id="checkout-badge" class="flag-tag on">new_checkout: ON</span>
+    <!-- Main Checkout Workspace -->
+    <main class="app-container">
+      <div class="page-intro">
+        <div>
+          <h1 class="page-title">Complete your subscription</h1>
+          <p class="page-subtitle">
+            Review your Studio Pro plan and payment details. Live changes from FlagLens in VS Code apply immediately.
+          </p>
         </div>
-        <div class="panel-body">
-          <!-- Mode A: 1-Click Express Checkout (new_checkout = ON) -->
-          <div id="express-view">
-            <div class="saved-card">
-              <div class="saved-card-left">
-                <span class="card-brand">VISA</span>
-                <div>
-                  <div class="saved-card-meta">Personal Visa ending in 4242</div>
-                  <div class="saved-card-sub">Expires 09/29 · Instant verification enabled</div>
-                </div>
-              </div>
-              <span class="flag-tag">Default</span>
-            </div>
-
-            <div class="summary-rows">
-              <div class="summary-row">
-                <span id="sum-plan-name">Flagsmith Studio Pro (Annual)</span>
-                <span id="sum-plan-price" class="mono">$19.00/mo</span>
-              </div>
-              <div class="summary-row">
-                <span>Self-hosted seats</span>
-                <span class="mono">Unlimited</span>
-              </div>
-              <div class="summary-row total">
-                <span>Due today</span>
-                <span id="sum-due-today" class="mono">$228.00</span>
-              </div>
-            </div>
-
-            <button id="express-pay-btn" class="btn-primary">Pay $228.00 in 1 Click</button>
-            <button id="express-alt-btn" class="btn-ghost">Use another payment method</button>
-          </div>
-
-          <!-- Mode B: Classic 4-Step Form (new_checkout = OFF) -->
-          <div id="classic-view" class="hidden">
-            <div class="steps-bar">
-              <span class="step-pill current">1. Details</span>
-              <span class="step-pill">2. Address</span>
-              <span class="step-pill">3. Payment</span>
-              <span class="step-pill">4. Review</span>
-            </div>
-
-            <div class="form-grid">
-              <div>
-                <label for="email">Work email</label>
-                <input id="email" type="email" value="alex@acme.dev" />
-              </div>
-              <div>
-                <label for="card">Card number</label>
-                <input id="card" type="text" value="4242 •••• •••• 4242" class="mono" />
-              </div>
-              <div class="form-row-2">
-                <div>
-                  <label for="exp">Expiration</label>
-                  <input id="exp" type="text" value="09 / 29" class="mono" />
-                </div>
-                <div>
-                  <label for="cvc">CVC</label>
-                  <input id="cvc" type="text" value="424" class="mono" />
-                </div>
-              </div>
-            </div>
-
-            <button id="classic-pay-btn" class="btn-primary">Continue to Billing Address</button>
-          </div>
+        <div class="demo-notice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+          <span>Simulated checkout demonstration — no real charges</span>
         </div>
-      </section>
+      </div>
 
-      <!-- Right Column: Pricing Experiment + Live Flag Telemetry -->
-      <div class="stack">
-        <section class="panel">
-          <div class="panel-header">
-            <h2 class="panel-title">Selected Plan</h2>
-            <span id="pricing-badge" class="flag-tag exp">pricing_ab_test: 50/50</span>
-          </div>
-          <div class="panel-body">
-            <div class="plan-option">
-              <div class="plan-top">
-                <span id="pricing-title" class="plan-name">Pro Annual</span>
-                <span id="pricing-price" class="plan-price mono">$19<span>/mo</span></span>
+      <div class="checkout-grid">
+        <!-- LEFT COLUMN: Customer Checkout Flow -->
+        <section id="checkout-region" class="checkout-surface" aria-labelledby="checkout-section-heading">
+          <!-- Active Checkout Flow -->
+          <div id="checkout-active-flow">
+            <!-- Mode A: 1-Click Express Checkout (`new_checkout = ON`) -->
+            <div id="express-view">
+              <div class="checkout-section">
+                <div class="section-head">
+                  <h2 id="checkout-section-heading" class="section-title">Express payment method</h2>
+                  <span class="section-meta">new_checkout: ON</span>
+                </div>
+
+                <div class="payment-list" role="radiogroup" aria-label="Select payment method">
+                  <button
+                    type="button"
+                    class="payment-option"
+                    role="radio"
+                    aria-checked="true"
+                    data-payment="visa"
+                  >
+                    <span class="payment-option-left">
+                      <span class="radio-ring" aria-hidden="true"></span>
+                      <span class="card-mark" aria-hidden="true">
+                        <svg width="28" height="10" viewBox="0 0 42 14" fill="none">
+                          <text x="2" y="11" fill="#1A1F71" font-family="Inter, sans-serif" font-weight="800" font-size="12" letter-spacing="0.5">VISA</text>
+                        </svg>
+                      </span>
+                      <span>
+                        <span class="payment-label">Visa ending in <span class="mono">4242</span></span>
+                        <span class="payment-sub">Expires 09/2029 · Alex Rivera</span>
+                      </span>
+                    </span>
+                    <span class="payment-tag">Default</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="payment-option"
+                    role="radio"
+                    aria-checked="false"
+                    data-payment="mastercard"
+                  >
+                    <span class="payment-option-left">
+                      <span class="radio-ring" aria-hidden="true"></span>
+                      <span class="card-mark" aria-hidden="true">
+                        <svg width="26" height="16" viewBox="0 0 26 16" fill="none">
+                          <circle cx="9.5" cy="8" r="6" fill="#EB001B" />
+                          <circle cx="16.5" cy="8" r="6" fill="#F79E1B" fill-opacity="0.9" />
+                        </svg>
+                      </span>
+                      <span>
+                        <span class="payment-label">Mastercard ending in <span class="mono">8819</span></span>
+                        <span class="payment-sub">Expires 04/2028 · Team Billing</span>
+                      </span>
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="payment-option"
+                    role="radio"
+                    aria-checked="false"
+                    data-payment="new_card"
+                  >
+                    <span class="payment-option-left">
+                      <span class="radio-ring" aria-hidden="true"></span>
+                      <span class="card-mark" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                          <rect x="2" y="5" width="20" height="14" rx="2" />
+                          <line x1="2" y1="10" x2="22" y2="10" />
+                        </svg>
+                      </span>
+                      <span>
+                        <span class="payment-label">Add a new payment card</span>
+                        <span class="payment-sub">Visa, Mastercard, or American Express</span>
+                      </span>
+                    </span>
+                  </button>
+                </div>
+
+                <!-- Expandable Inline Card Form when "Add a new payment card" is selected -->
+                <div id="express-new-card-form" class="new-card-fields hidden">
+                  <div class="form-stack">
+                    <div class="field">
+                      <label for="express-card-number">Card number</label>
+                      <input id="express-card-number" type="text" class="mono" placeholder="4242 4242 4242 4242" autocomplete="cc-number" />
+                    </div>
+                    <div class="form-row-2">
+                      <div class="field">
+                        <label for="express-card-exp">Expiration</label>
+                        <input id="express-card-exp" type="text" class="mono" placeholder="MM / YY" autocomplete="cc-exp" />
+                      </div>
+                      <div class="field">
+                        <label for="express-card-cvc">Security code</label>
+                        <input id="express-card-cvc" type="text" class="mono" placeholder="CVC" autocomplete="cc-csc" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <p id="pricing-desc" class="plan-desc">
-                Billed annually ($228/yr). Save 20% compared to monthly billing.
+
+              <div class="checkout-section">
+                <div class="section-head">
+                  <h2 class="section-title">Billing contact</h2>
+                </div>
+                <div class="form-row-2">
+                  <div class="field">
+                    <label for="express-email">Receipt email</label>
+                    <input id="express-email" type="email" value="alex@acme.dev" autocomplete="email" />
+                  </div>
+                  <div class="field">
+                    <label for="express-org">Workspace name</label>
+                    <input id="express-org" type="text" value="Acme Engineering" autocomplete="organization" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mode B: Classic Multi-Step Checkout (`new_checkout = OFF`) -->
+            <div id="classic-view" class="hidden">
+              <div class="checkout-section">
+                <div class="section-head">
+                  <h2 class="section-title">Standard multi-step checkout</h2>
+                  <span class="section-meta">new_checkout: OFF</span>
+                </div>
+
+                <div class="stepper" role="tablist" aria-label="Checkout steps">
+                  <button type="button" class="step-btn active" data-step="1" role="tab" aria-selected="true">
+                    <span class="step-num">01</span> Account
+                  </button>
+                  <button type="button" class="step-btn" data-step="2" role="tab" aria-selected="false">
+                    <span class="step-num">02</span> Billing address
+                  </button>
+                  <button type="button" class="step-btn" data-step="3" role="tab" aria-selected="false">
+                    <span class="step-num">03</span> Card details
+                  </button>
+                </div>
+
+                <!-- Step 1 -->
+                <div class="classic-step" data-step-panel="1">
+                  <div class="form-stack">
+                    <div class="field">
+                      <label for="classic-name">Full name</label>
+                      <input id="classic-name" type="text" value="Alex Rivera" autocomplete="name" />
+                    </div>
+                    <div class="field">
+                      <label for="classic-email">Work email</label>
+                      <input id="classic-email" type="email" value="alex@acme.dev" autocomplete="email" />
+                      <p class="field-hint">Invoices and license keys will be sent to this address.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="classic-step hidden" data-step-panel="2">
+                  <div class="form-stack">
+                    <div class="field">
+                      <label for="classic-company">Company or team</label>
+                      <input id="classic-company" type="text" value="Acme Engineering Inc." />
+                    </div>
+                    <div class="form-row-2">
+                      <div class="field">
+                        <label for="classic-city">City</label>
+                        <input id="classic-city" type="text" value="San Francisco" />
+                      </div>
+                      <div class="field">
+                        <label for="classic-zip">Postal code</label>
+                        <input id="classic-zip" type="text" class="mono" value="94107" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="classic-step hidden" data-step-panel="3">
+                  <div class="form-stack">
+                    <div class="field">
+                      <label for="classic-card">Card number</label>
+                      <input id="classic-card" type="text" class="mono" value="4242 4242 4242 4242" />
+                    </div>
+                    <div class="form-row-2">
+                      <div class="field">
+                        <label for="classic-exp">Expiration</label>
+                        <input id="classic-exp" type="text" class="mono" value="09 / 29" />
+                      </div>
+                      <div class="field">
+                        <label for="classic-cvc">CVC</label>
+                        <input id="classic-cvc" type="text" class="mono" value="424" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Shared Order Summary & Primary Action -->
+            <div class="checkout-section">
+              <div class="order-lines">
+                <div class="order-line">
+                  <span id="sum-plan-name">ToggleShop Studio Pro (Annual)</span>
+                  <span id="sum-plan-rate" class="tabular">$19.00 / mo</span>
+                </div>
+                <div class="order-line">
+                  <span>Billing cycle</span>
+                  <span id="sum-cycle">Billed annually (12 months)</span>
+                </div>
+                <div id="sum-savings-row" class="order-line savings">
+                  <span>Annual billing discount (20%)</span>
+                  <span class="tabular">−$60.00 / yr</span>
+                </div>
+                <div class="order-line total">
+                  <span>Total due today</span>
+                  <span id="sum-due-today" class="total-amount tabular">$228.00</span>
+                </div>
+              </div>
+
+              <div class="action-row">
+                <button id="primary-pay-btn" type="button" class="btn-primary">
+                  <span id="primary-pay-label">Confirm &amp; Pay $228.00</span>
+                </button>
+                <button id="secondary-action-btn" type="button" class="btn-secondary">
+                  Use a different payment method
+                </button>
+              </div>
+              <p class="checkout-footnote">
+                Demo environment only. Submitting simulates a subscription confirmation without charging any card.
               </p>
-              <ul class="plan-list">
-                <li><span class="check">✓</span> Unlimited environments &amp; feature flags</li>
-                <li><span class="check">✓</span> Built-in Bayesian A/B experimentation</li>
-                <li><span class="check">✓</span> FlagLens VS Code live sync</li>
-              </ul>
             </div>
-            <button id="pricing-btn" class="btn-ghost">Compare all tiers</button>
+          </div>
+
+          <!-- Simulated Receipt State after Checkout -->
+          <div id="receipt-view" class="receipt-panel hidden" role="status" aria-live="polite">
+            <div class="receipt-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <h2 class="receipt-title">Simulated subscription confirmed</h2>
+            <p class="receipt-sub">
+              This checkout flow completed in demonstration mode using your live Flagsmith configuration.
+            </p>
+            <div class="receipt-meta">
+              <div class="receipt-row">
+                <span style="color: var(--text-muted)">Checkout flow</span>
+                <span id="receipt-flow" class="mono">Express (new_checkout: ON)</span>
+              </div>
+              <div class="receipt-row">
+                <span style="color: var(--text-muted)">Selected plan</span>
+                <span id="receipt-plan">Pro Annual ($228.00)</span>
+              </div>
+              <div class="receipt-row">
+                <span style="color: var(--text-muted)">Payment method</span>
+                <span id="receipt-method">Visa ending in 4242</span>
+              </div>
+            </div>
+            <button id="reset-checkout-btn" type="button" class="btn-secondary">
+              Return to checkout
+            </button>
           </div>
         </section>
 
-        <section class="panel">
-          <div class="panel-header">
-            <h2 class="panel-title">Live Flag Telemetry</h2>
-            <span id="active-count" class="flag-tag mono">0/5 ON</span>
-          </div>
-          <div class="panel-body">
-            <table class="telemetry-table">
-              <tbody id="telemetry-body">
-                <tr>
-                  <td class="t-name">Connecting...</td>
-                  <td class="t-state t-off">—</td>
-                </tr>
-              </tbody>
-            </table>
-            <div id="activity-feed" class="log-box">
-              <div class="log-entry">Polling http://localhost:8000/api/v1/flags/</div>
+        <!-- RIGHT COLUMN: Subscription Summary + Developer Telemetry -->
+        <aside class="sidebar-stack" aria-label="Subscription details and developer telemetry">
+          <!-- Subscription Plan Summary (`pricing_ab_test`) -->
+          <section id="pricing-region" class="summary-panel" aria-labelledby="plan-heading">
+            <div class="plan-header">
+              <div>
+                <p class="plan-kicker">Subscription summary</p>
+                <h2 id="plan-heading" class="plan-heading">Studio Pro</h2>
+              </div>
+              <span id="pricing-variant-chip" class="variant-chip">annual_first</span>
             </div>
-          </div>
-        </section>
+
+            <div class="cadence-grid" id="cadence-list">
+              <div id="cadence-annual" class="cadence-card recommended">
+                <div>
+                  <div class="cadence-name">
+                    <span>Annual</span>
+                    <span class="save-label">Save 20%</span>
+                  </div>
+                  <div class="cadence-sub">Billed $228 once per year</div>
+                </div>
+                <div class="cadence-price tabular">$19<span>/mo</span></div>
+              </div>
+
+              <div id="cadence-monthly" class="cadence-card">
+                <div>
+                  <div class="cadence-name"><span>Monthly</span></div>
+                  <div class="cadence-sub">Flexible, cancel anytime</div>
+                </div>
+                <div class="cadence-price tabular">$24<span>/mo</span></div>
+              </div>
+            </div>
+
+            <ul class="plan-features">
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span>Unlimited self-hosted environments and flags</span>
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span>Built-in Bayesian A/B experimentation engine</span>
+              </li>
+              <li>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span>FlagLens VS Code inline status &amp; audit tools</span>
+              </li>
+            </ul>
+
+            <button
+              id="compare-tiers-btn"
+              type="button"
+              class="btn-secondary"
+              aria-expanded="false"
+              aria-controls="compare-drawer"
+            >
+              Compare all plans
+            </button>
+
+            <div id="compare-drawer" class="compare-drawer hidden">
+              <table class="compare-table" aria-label="Plan comparison">
+                <thead>
+                  <tr>
+                    <th>Capability</th>
+                    <th>Free</th>
+                    <th class="col-pro">Pro</th>
+                    <th>Scale</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Environments</td>
+                    <td>2</td>
+                    <td class="col-pro">Unlimited</td>
+                    <td>Unlimited</td>
+                  </tr>
+                  <tr>
+                    <td>A/B Experiments</td>
+                    <td>—</td>
+                    <td class="col-pro">Included</td>
+                    <td>Included</td>
+                  </tr>
+                  <tr>
+                    <td>Audit &amp; RBAC</td>
+                    <td>Basic</td>
+                    <td class="col-pro">Full</td>
+                    <td>SSO + Audit</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Developer Telemetry Console (Collapsible) -->
+          <section id="telemetry-console" class="telemetry-console" aria-label="Live Feature Flag Telemetry">
+            <button
+              id="telemetry-toggle-btn"
+              type="button"
+              class="console-header"
+              aria-expanded="true"
+              aria-controls="telemetry-body-wrap"
+            >
+              <span class="console-title-group">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="4 17 10 11 4 5" />
+                  <line x1="12" y1="19" x2="20" y2="19" />
+                </svg>
+                <span class="console-title">Flagsmith Telemetry</span>
+                <span id="active-count" class="console-count">0/5 active</span>
+              </span>
+              <svg class="console-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+
+            <div id="telemetry-body-wrap" class="console-body">
+              <div class="console-meta-bar">
+                <span id="console-state-label" class="console-state-confirmed">Connecting to localhost:8000</span>
+                <span id="console-last-sync">Last sync: —</span>
+              </div>
+
+              <div id="telemetry-rows" class="flag-rows" role="list">
+                <div class="flag-row" role="listitem">
+                  <span class="flag-row-name">Waiting for Flagsmith response...</span>
+                  <span class="flag-state-pill off">—</span>
+                </div>
+              </div>
+
+              <div id="activity-feed" class="console-log" aria-live="polite">
+                <div class="console-log-entry">GET http://localhost:8000/api/v1/flags/</div>
+              </div>
+            </div>
+          </section>
+        </aside>
       </div>
     </main>
 
-    <div id="toast" class="toast"></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
     <script src="./app.js"></script>
   </body>
 </html>
