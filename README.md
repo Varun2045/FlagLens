@@ -21,7 +21,7 @@
 
 | Resource | Link |
 | :--- | :--- |
-| **VS Code Marketplace** | *[Add VS Code Marketplace URL here]* *(or install [`flaglens-1.0.0.vsix`](flaglens-1.0.0.vsix))* |
+| **VS Code Marketplace** | **[marketplace.visualstudio.com/items?itemName=varun2045.flaglens](https://marketplace.visualstudio.com/items?itemName=varun2045.flaglens)** *(or `code --install-extension varun2045.flaglens`)* |
 | **Live Demo Storefront (Vercel)** | **[flaglens-demo-app.vercel.app](https://flaglens-demo-app.vercel.app/)** |
 | **Demo Video (2 min)** | *[Add YouTube / Loom Demo Video URL here]* |
 
@@ -29,10 +29,11 @@
 
 ## VS Code Marketplace
 
-Install **FlagLens** directly from the Visual Studio Code Marketplace (or via `code --install-extension flaglens-1.0.0.vsix`):
+Install **FlagLens** directly from the **[Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=varun2045.flaglens)** or via CLI:
 
-<!-- Paste Marketplace screenshot at docs/screenshots/07-vscode-marketplace.png -->
-> *VS Code Marketplace screenshot coming soon — upload to `docs/screenshots/07-vscode-marketplace.png`.*
+```bash
+code --install-extension varun2045.flaglens
+```
 
 ---
 
