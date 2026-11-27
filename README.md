@@ -1,103 +1,134 @@
-# FlagLens — Live Feature Flag & Experimentation Companion for VS Code
+<div align="center">
 
-> **Built for Toggle Wars: The Flagsmith Experimentation Hackathon — Track 03: Build on Open Source Flagsmith**
+<img src="media/icon.png" alt="FlagLens Logo" width="84" height="84" />
 
-**FlagLens** brings your **self-hosted open-source Flagsmith** instance directly into VS Code—so you can see live flag states, inspect A/B experiment splits, toggle flags across environments, wrap code in new flags, and catch typo/stale flags without ever leaving your editor.
+# FlagLens
+
+**Live feature flag inspection, 1-click toggles, experiment visibility, and codebase auditing for self-hosted [Flagsmith](https://github.com/Flagsmith/flagsmith) — directly inside VS Code.**
+
+[![VS Code](https://img.shields.io/badge/VS%20Code-1.85%2B-007ACC?style=flat-square&logo=visualstudiocode&logoColor=white)](https://code.visualstudio.com/)
+[![Flagsmith](https://img.shields.io/badge/Flagsmith-Self--Hosted%20%26%20Cloud-6837FC?style=flat-square)](https://github.com/Flagsmith/flagsmith)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-15803D?style=flat-square)](LICENSE)
+
+*Built for **Toggle Wars: The Flagsmith Experimentation Hackathon** — Track 03: Build on Open Source Flagsmith*
+
+</div>
 
 ---
 
-## Live Screenshots
+## Overview
 
-### 1. Inline Live Status & Experiment Split Badges
-![Inline Live Badges](docs/screenshots/01-inline-badges.jpg)
+Shipping features behind feature flags usually forces engineers to constantly alt-tab between their editor and the Flagsmith dashboard just to check whether a flag is enabled in Development vs. Production, inspect multivariate A/B split weights, verify spelling, or hunt down stale flags.
 
-### 2. Cross-Environment Hover Card + 1-Click Toggle
-![Hover Card with 1-Click Toggle](docs/screenshots/02-hover-toggle.png)
+**FlagLens** eliminates that context switch by bringing your self-hosted open-source Flagsmith instance straight into VS Code—with live inline status badges, cross-environment hover controls, 1-click code wrapping, and automatic Ghost & Stale flag diagnostics.
 
-### 3. Feature Flags Sidebar Explorer & Flag Health Audit
-| Feature Flags Explorer | Ghost & Stale Flag Audit |
+---
+
+## Screenshots
+
+### Inline Live Status & Experiment Split Badges
+Live `ON`/`OFF` states across environments, remote config values, multivariate A/B split percentages, and inline Ghost Flag warnings appear directly beside your Flagsmith SDK calls.
+
+![FlagLens Inline Badges](docs/screenshots/01-inline-badges.jpg)
+
+### Cross-Environment Hover Card & 1-Click Toggle
+Hover over any flag identifier in code to inspect its description and state across **Development**, **Staging**, and **Production**, then toggle the flag or edit its remote config value without leaving the editor.
+
+![FlagLens Hover Card](docs/screenshots/02-hover-toggle.png)
+
+### Sidebar Explorer & Flag Health Audit
+Browse all flags, jump directly to every file and line reference, catch typos (**Ghost Flags**) with 1-click Levenshtein Quick Fixes, and surface **Stale / Unused Flags** with zero workspace references.
+
+| Feature Flags Explorer | Flag Health & Audit |
 | :---: | :---: |
-| ![Feature Flags Sidebar](docs/screenshots/03-sidebar-explorer.png) | ![Flag Health & Audit](docs/screenshots/04-flag-health-audit.png) |
+| ![Feature Flags Sidebar](docs/screenshots/03-sidebar-explorer.png) | ![Flag Health Audit](docs/screenshots/04-flag-health-audit.png) |
 
-### 4. ToggleShop Live Demo App (`http://localhost:3000`)
-| Light Editorial (Express Checkout + Annual) | Dark Cyber (3-Step Checkout + Monthly) |
+### Live Demo Storefront (`ToggleShop`)
+Included in `demo-app/` to demonstrate real-time Flagsmith synchronization: toggling `new_checkout`, `pricing_ab_test`, `dark_mode_neon`, or `promo_banner_copy` in VS Code updates the storefront immediately without a redeploy.
+
+| Light Mode · Express Checkout · Annual Variant | Dark Cyber Mode · 3-Step Checkout · Monthly Variant |
 | :---: | :---: |
-| ![ToggleShop Light Demo](docs/screenshots/05-toggleshop-live-demo.png) | ![ToggleShop Dark Cyber Demo](docs/screenshots/06-toggleshop-dark-classic.png) |
-
-> **Demo Video:** See [DEMO_SCRIPT.md](DEMO_SCRIPT.md) for the full 2-minute walkthrough *(add your YouTube / Loom demo link here before submitting)*.
+| ![ToggleShop Light Mode](docs/screenshots/05-toggleshop-live-demo.png) | ![ToggleShop Dark Cyber Mode](docs/screenshots/06-toggleshop-dark-classic.png) |
 
 ---
 
-## Highlights (Works Instantly Out of the Box)
+## Key Capabilities
 
-- **Zero-Setup Auto-Start Local Sandbox:** The moment you install FlagLens and open VS Code, it connects to your self-hosted Flagsmith (`http://localhost:8000`). If no external server is running yet, FlagLens **automatically starts its own built-in Flagsmith-compatible sandbox**—zero terminals required!
-- **Inline Live Status & Experiment Badges:** Detects Flagsmith SDK calls (`hasFeature`, `getValue`, `useFlags`, `is_feature_enabled`, `IsFeatureEnabled`, etc.) across JS/TS, React, Python, Go, Java, and Dart and renders live end-of-line pills:
-  - Standard flag: `● ON [dev] | ○ OFF [prod]`
-  - Remote config value: `● ON [dev] · "express_v2" | ○ OFF [prod]`
-  - Multivariate / A/B Experiment: `🧪 ● ON · 50% / 50% Split [dev]`
-  - Unknown / Typo flag: `⚠ Ghost Flag — Did you mean "new_checkout"?`
-- **Rich Cross-Environment Hover Cards + 1-Click Toggles:** Hover over any flag name in your code to see its description, live status across **Development, Staging, and Production**, and clickable buttons right inside the tooltip:
-  - **`Toggle in Development`** · **`Edit Value`** · **`Open in Flagsmith`**
-- **1-Click "Wrap Selection in Flagsmith Flag":** Highlight any block of code → Right-click (or `Ctrl+.`) → **Wrap Selection in Flagsmith Feature Flag**. FlagLens wraps your code in `if (flagsmith.hasFeature('...')) { ... }` **and creates the flag in Flagsmith automatically**.
-- **Ghost & Stale Flag Health Audit:**
-  - **Ghost Flags (Typos):** Yellow squiggly diagnostics on flags referenced in code that don't exist in Flagsmith, with 1-click Quick Fixes (`Replace with "new_checkout"` via Levenshtein fuzzy matching, or `Create flag in Flagsmith`).
-  - **Stale / Unused Flags:** Surfaces flags in Flagsmith that have `0` references across your workspace so teams can clean up flag debt.
-- **Activity Bar Sidebar & Status Bar:**
-  - **Switch Environment** (`Development` / `Staging` / `Production`)
-  - **Create New Flag** (`+`) directly from VS Code
-  - **Refresh Flags** (`↻`) & re-scan workspace health
-  - **Configure Connection** (`🔌`) to point to any self-hosted Flagsmith or Flagsmith Cloud URL
-  - Click any flag usage (`app.js:58`) to jump straight to that line of code.
-- **Full Flagsmith API Compatibility:** Supports Organisation API Keys (`Api-Key ser.*`), Admin `Token` auth, multivariate splits, and both **Flagsmith v1** and **Feature Versioning v2** environments.
+| Capability | Description |
+| :--- | :--- |
+| **Inline Live Badges** | Detects `hasFeature`, `getValue`, `useFlags`, `is_feature_enabled`, `IsFeatureEnabled`, and `GetFeatureValue` across JS/TS, React, Python, Go, Java, and Dart. |
+| **1-Click Hover Actions** | Cross-environment state matrix with direct **`Toggle`**, **`Edit Value`**, and **`Open in Flagsmith`** commands. |
+| **Wrap Selection in Flag** | Highlight any block of code → Right-click or `Ctrl+.` → wraps the code in `if (flagsmith.hasFeature('...'))` and creates the flag in Flagsmith automatically. |
+| **Ghost Flag Diagnostics** | Underlines unknown/misspelled flag names with 1-click Quick Fixes (`Replace with "new_checkout"` via Levenshtein matching, or `Create flag in Flagsmith`). |
+| **Stale Flag Detection** | Scans your workspace and lists flags in Flagsmith with `0` code references to help eliminate flag debt. |
+| **Zero-Setup Local Sandbox** | Connects to your self-hosted Flagsmith (`localhost:8000`) automatically, or starts an embedded Flagsmith-compatible sandbox if no external server is running. |
+| **v1 & v2 API Support** | Works with Organisation API Keys (`Api-Key ser.*`), Admin `Token` auth, multivariate splits, and both Flagsmith v1 and Feature Versioning v2 environments. |
 
 ---
 
-## How Flagsmith Is Used
+## Quick Start
 
-FlagLens is built around **open-source, self-hosted Flagsmith**:
-1. **Official Self-Hosted Stack (`docker/docker-compose.yml`):** Includes Flagsmith's official Docker Compose setup (PostgreSQL + Flagsmith API/UI + Task Processor, with Experimentation enabled by default) plus `docker/seed.mjs` to auto-seed sample flags.
-2. **Flagsmith Management REST API (`src/flagsmithClient.ts`):** Reads projects (`/api/v1/projects/`), environments (`/api/v1/environments/`), features & multivariate options (`/api/v1/projects/{id}/features/`), and live feature states (`/api/v1/environments/{env_key}/featurestates/`), and mutates toggles/values via `PUT` (with automatic fallback to Feature Versioning v2 `/versions/` + `/publish/`).
-3. **Live Demo App (`demo-app/`):** The included **ToggleShop** web app polls `/api/v1/flags/` on `http://localhost:8000` every 1.5s, so flipping a flag in VS Code updates the browser UI live.
+### Option 1: Install & Try Instantly (Zero Setup)
 
----
-
-## 60-Second Quickstart
-
-### Option A: Instant Try (Zero Terminals Needed for FlagLens)
-1. Install **`flaglens-1.0.0.vsix`** (`code --install-extension flaglens-1.0.0.vsix`).
-2. Open the **`demo-app/`** folder in VS Code and open **`app.js`**.
-3. FlagLens automatically starts its built-in local Flagsmith sandbox on `http://localhost:8000` and lights up every flag inline!
-4. *(Optional)* Run `npm run demo-app` and open **`http://localhost:3000`** to watch **ToggleShop** update live as you toggle flags in VS Code.
-
-### Option B: With Real Self-Hosted Flagsmith (Docker)
 ```bash
-# 1. Start self-hosted open-source Flagsmith (http://localhost:8000)
+# 1. Install the pre-packaged extension in VS Code
+code --install-extension flaglens-1.0.0.vsix
+
+# 2. Open the included demo workspace in VS Code
+code demo-app
+```
+
+Open `demo-app/app.js` (lines 188–248). FlagLens automatically starts its embedded local Flagsmith sandbox on `http://localhost:8000` if no external Flagsmith instance is running.
+
+To watch the live **ToggleShop** storefront respond to your VS Code toggles:
+```bash
+npm run demo-app
+# Open http://localhost:3000
+```
+
+### Option 2: Connect to Self-Hosted Flagsmith (Docker)
+
+FlagLens ships with Flagsmith's official Docker Compose configuration (PostgreSQL + Flagsmith API/UI + Task Processor, with Experimentation enabled by default):
+
+```bash
+# 1. Start self-hosted open-source Flagsmith on http://localhost:8000
 cd docker
 docker compose up -d
 
-# 2. Create an account + project at http://localhost:8000 and copy your Organisation API Key (ser.*)
-# 3. Seed sample flags into your self-hosted Flagsmith:
-FLAGSMITH_URL=http://localhost:8000 FLAGSMITH_TOKEN=ser.YOUR_KEY node seed.mjs
+# 2. Create an account + project at http://localhost:8000 and generate an Organisation API Key (ser.*)
+
+# 3. Seed the ToggleShop sample flags into your self-hosted instance
+FLAGSMITH_URL=http://localhost:8000 FLAGSMITH_TOKEN=ser.YOUR_API_KEY node seed.mjs
 ```
-Then click the **Plug (`🔌`)** icon in FlagLens to enter your `ser.*` key!
+
+In VS Code, click the **Configure Connection** (`🔌`) icon in the FlagLens sidebar and enter `http://localhost:8000` with your `ser.*` API key.
 
 ---
 
-## Extension Settings
+## How Flagsmith Is Integrated
+
+- **Self-Hosted Deployment (`docker/docker-compose.yml` & `docker/seed.mjs`):** Spins up open-source Flagsmith locally with Experimentation enabled and seeds 5 sample flags (`new_checkout`, `pricing_ab_test`, `dark_mode_neon`, `promo_banner_copy`, and `legacy_holiday_sale_2024`).
+- **Flagsmith Management REST API (`src/flagsmithClient.ts`):** Consumes `/api/v1/projects/`, `/api/v1/environments/`, `/api/v1/projects/{id}/features/`, and `/api/v1/environments/{env_key}/featurestates/`, and writes updates via `PUT` (with automatic fallback to Feature Versioning v2 `/versions/` + `/publish/`).
+- **Flagsmith Client API (`demo-app/app.js`):** Polls `/api/v1/flags/` with `X-Environment-Key` to reflect live flag toggles and A/B experiment variants in real time.
+
+---
+
+## Configuration & Commands
+
+### Settings
 
 | Setting | Default | Description |
 | :--- | :--- | :--- |
-| `flaglens.apiUrl` | `http://localhost:8000` | Base URL of your self-hosted Flagsmith instance |
+| `flaglens.apiUrl` | `http://localhost:8000` | Base URL of your self-hosted Flagsmith or Flagsmith Cloud instance |
 | `flaglens.apiToken` | `flaglens-dev-token` | Flagsmith Organisation API Key (`ser.*`) or Admin Token |
-| `flaglens.projectId` | `0` | Project ID (`0` = auto-select first project) |
-| `flaglens.defaultEnvironment` | `Development` | Default environment shown in inline badges & sidebar |
-| `flaglens.autoRefreshSeconds` | `15` | Live polling interval in seconds (`0` = manual refresh) |
-| `flaglens.showInlineBadges` | `true` | Toggle inline end-of-line status & A/B split badges |
-| `flaglens.autoStartLocalSandbox` | `true` | Auto-start built-in local sandbox if `localhost:8000` is offline |
+| `flaglens.projectId` | `0` | Flagsmith Project ID (`0` auto-selects the first project) |
+| `flaglens.defaultEnvironment` | `Development` | Default environment shown in inline badges and sidebar |
+| `flaglens.autoRefreshSeconds` | `15` | Polling interval in seconds (`0` disables auto-polling) |
+| `flaglens.showInlineBadges` | `true` | Toggle inline end-of-line status and experiment split badges |
+| `flaglens.autoStartLocalSandbox` | `true` | Auto-start embedded local sandbox when `localhost:8000` is offline |
 
----
-
-## Commands
+### Commands
 
 - `FlagLens: Switch Active Environment`
 - `FlagLens: Create New Feature Flag`
@@ -111,42 +142,46 @@ Then click the **Plug (`🔌`)** icon in FlagLens to enter your `ser.*` key!
 
 ---
 
-## Running Tests & Packaging
+## Repository Structure
 
-```bash
-npm run compile   # Compile TypeScript
-npm test          # Run scanner, fuzzy-match & Flagsmith API integration tests
-npm run package   # Build installable flaglens-1.0.0.vsix
+```text
+FlagLens/
+├── src/
+│   ├── extension.ts            # Extension entry point, commands & wrap-in-flag refactor
+│   ├── flagsmithClient.ts      # Flagsmith Management API client (v1 + v2 fallback)
+│   ├── flagScanner.ts          # Multi-language SDK call scanner & Levenshtein matcher
+│   ├── flagStore.ts            # Reactive flag store, polling & workspace health audit
+│   ├── localSandbox.ts         # Embedded zero-setup Flagsmith-compatible local sandbox
+│   ├── decorationProvider.ts   # Inline status, A/B split & ghost flag decorations
+│   ├── hoverProvider.ts        # Cross-environment hover cards & 1-click actions
+│   ├── diagnosticsProvider.ts  # Ghost flag diagnostics, Quick Fixes & code actions
+│   ├── sidebarProvider.ts      # Feature Flags & Flag Health TreeView providers
+│   └── statusBar.ts            # Status bar environment switcher & health summary
+├── docker/
+│   ├── docker-compose.yml      # Official self-hosted Flagsmith Docker Compose stack
+│   ├── seed.mjs                # Seeds sample flags into self-hosted Flagsmith
+│   └── mock-flagsmith.mjs      # Standalone local Flagsmith-compatible API server
+├── demo-app/                   # ToggleShop storefront wired to localhost:8000
+├── tests/core.test.mjs         # Unit & end-to-end integration tests
+├── media/                      # Extension icon (icon.png) & Activity Bar icon (icon.svg)
+└── flaglens-1.0.0.vsix         # Pre-built installable VS Code extension package
 ```
 
 ---
 
-## Architecture
+## Development & Testing
 
-```text
-FlagSmith/
-├── src/
-│   ├── extension.ts            # Activation, commands, wrap-in-flag refactor
-│   ├── flagsmithClient.ts      # Self-hosted Flagsmith Management API client (v1 + v2)
-│   ├── flagScanner.ts          # Multi-language SDK call scanner + Levenshtein matcher
-│   ├── flagStore.ts            # Reactive store, polling, workspace health audit
-│   ├── localSandbox.ts         # Embedded zero-terminal local Flagsmith sandbox server
-│   ├── decorationProvider.ts   # Inline live ON/OFF, Experiment split & Ghost badges
-│   ├── hoverProvider.ts        # Rich cross-environment hover cards + 1-click actions
-│   ├── diagnosticsProvider.ts  # Ghost flag squiggles + Quick Fix & Wrap code actions
-│   ├── sidebarProvider.ts      # Activity Bar Feature Flags & Flag Health TreeViews
-│   └── statusBar.ts            # Status bar environment switcher & health pill
-├── media/
-│   ├── icon.png                # Floating transparent FlagLens extension icon
-│   └── icon.svg                # Activity Bar sidebar icon
-├── docker/
-│   ├── docker-compose.yml      # Official self-hosted Flagsmith Docker Compose
-│   ├── seed.mjs                # Seeds sample flags into self-hosted Flagsmith
-│   └── mock-flagsmith.mjs      # Standalone Flagsmith-compatible local server
-├── demo-app/                   # ToggleShop live demo web app (polls localhost:8000)
-└── tests/                      # Unit & integration tests (node --test)
+```bash
+npm install       # Install dev dependencies
+npm run compile   # Compile TypeScript (src/ -> out/)
+npm test          # Run scanner, fuzzy-match & Flagsmith API integration tests
+npm run package   # Build flaglens-1.0.0.vsix
 ```
+
+Press **`F5`** in VS Code to launch the Extension Development Host directly against `demo-app/`.
+
+---
 
 ## License
 
-MIT
+[MIT](LICENSE)
