@@ -22,7 +22,7 @@
 | Resource | Link |
 | :--- | :--- |
 | **VS Code Marketplace** | *[Add VS Code Marketplace URL here]* *(or install [`flaglens-1.0.0.vsix`](flaglens-1.0.0.vsix))* |
-| **Live Demo Storefront (Vercel)** | *[Add Vercel Deployment URL here]* |
+| **Live Demo Storefront (Vercel)** | **[flaglens-demo-app.vercel.app](https://flaglens-demo-app.vercel.app/)** |
 | **Demo Video (2 min)** | *[Add YouTube / Loom Demo Video URL here]* |
 
 ---
