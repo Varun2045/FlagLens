@@ -4,3 +4,4 @@ out/
 *.log
 .env
 DEMO_SCRIPT.md
+*.mp4
