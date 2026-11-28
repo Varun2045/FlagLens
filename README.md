@@ -29,6 +29,8 @@
 
 ## VS Code Marketplace
 
+[![FlagLens on VS Code Marketplace](docs/screenshots/07-vscode-marketplace.png)](https://marketplace.visualstudio.com/items?itemName=varun2045.flaglens)
+
 Install **FlagLens** directly from the **[Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=varun2045.flaglens)** or via CLI:
 
 ```bash
